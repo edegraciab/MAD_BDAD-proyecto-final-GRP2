@@ -1,5 +1,17 @@
 {
-  "mongo_user": "reader12",
-  "mongo_pass": "reader12",
-  "mongo_host": "educationalcluster.7xf5hht.mongodb.net"    
+    "etl_source_cnx": {
+        "mongo_user": "reader12",
+        "mongo_pass": "reader12"
+    },
+    "source_cnx": {
+        "mongo_user": "reader123",
+        "mongo_pass": "reader123"
+    },
+    "student_cnx": {
+        "grp_user": "evaristodegracia_db_user",
+        "grp_pass": "VcWpXg6ZRwZhUJHy",
+        "grp_host": "madbdadedg.rkeiqpl.mongodb.net",
+        "grp_appName": "MADBDADedg"
+    }
+
 }
