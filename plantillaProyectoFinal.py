@@ -31,7 +31,7 @@ spark = (
 )
 
 # --- 1. Leer CSV como DataFrame ---
-csv_df = spark.read.csv("data/listings.csv", header=True, inferSchema=True)
+csv_df = spark.read.csv("listings.csv", header=True, inferSchema=True)
 csv_df.printSchema()
 
 # --- 2. Leer colección Mongo como DataFrame ---
