@@ -9,11 +9,11 @@ with open("config.json") as f:
 user = config["student_cnx"]["grp_user"]
 password = config["student_cnx"]["grp_pass"]
 _host = config["student_cnx"]["grp_host"]
-connection_string = f"mongodb+srv://{user}:{password}@{_host}/?retryWrites=true&w=majority&appName=MADBDADedg"
+grp_connection_string = f"mongodb+srv://{user}:{password}@{_host}/?retryWrites=true&w=majority&appName=MADBDADedg"
 
 # --- MongoDB connection ---
-def conectar_mongodb():
-    url = connection_string
+def conectar_grp_mongodb():
+    url = grp_connection_string
     client = MongoClient(url, server_api=ServerApi('1'))
     
     # Probar la conexión
@@ -56,18 +56,18 @@ def insertar_dimensions(client, dimensions):
 
 # --- Main execution ---
 if __name__ == "__main__":
-    client = None
+    grp_client = None
     try:
         # Conectar a MongoDB
-        client = conectar_mongodb()
-        if client is None:
+        grp_client = conectar_grp_mongodb()
+        if grp_client is None:
             exit(1)
         
         # Cargar datos desde el archivo JSON
         dimensions = cargar_dimensions()
         
         # Insertar dimensions.json a la colección
-        collection = insertar_dimensions(client, dimensions)
+        collection = insertar_dimensions(grp_client, dimensions)
         
         # Mostrar un documento de ejemplo
         sample_doc = collection.find_one()
@@ -83,6 +83,6 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"Error durante la carga: {e}")
     finally:
-        if client:
-            client.close()
+        if grp_client:
+            grp_client.close()
             print("Conexión cerrada.")
