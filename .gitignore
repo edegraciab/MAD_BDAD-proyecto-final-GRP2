@@ -1,3 +1,2 @@
-listings_dimensions.json
-listings_facts.json
-listings.csv
+data/*
+old/*

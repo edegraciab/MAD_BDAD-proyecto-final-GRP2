@@ -39,17 +39,17 @@ def cargar_datos_necesarios():
     
     # 1. Leer CSV (contiene property_type)
     print_time("Leyendo CSV para property_type...")
-    csv_df = spark.read.csv("listings.csv", header=True, inferSchema=True)
+    csv_df = spark.read.csv("data/listings.csv", header=True, inferSchema=True)
     print_time(f"CSV cargado: {csv_df.count()} registros")
     
     # 2. Leer JSON facts (contiene price)
     print_time("Leyendo JSON facts para price...")
-    df_facts = spark.read.option("multiline", "true").json("listings_facts.json")
+    df_facts = spark.read.option("multiline", "true").json("data/listings_facts.json")
     print_time("Facts JSON cargado")
     
     # 3. Leer JSON dimensions LOCAL (contiene address.country)
     print_time("Leyendo JSON dimensions LOCAL para country...")
-    df_dimensions_raw = spark.read.option("multiline", "true").json("listings_dimensions.json")
+    df_dimensions_raw = spark.read.option("multiline", "true").json("data/listings_dimensions.json")
     print_time("Dimensions JSON local cargado")
     
     # Seleccionar solo los campos necesarios: _id y address.country
@@ -104,8 +104,8 @@ def calcular_precio_promedio_por_tipo_y_pais():
     print_time("=== EJECUTANDO CONSULTAS ===")
     
     try:
-        # Consulta 1: Intentar con price como NumberDecimal
-        print_time("Consulta 1: Con price como NumberDecimal...")
+        # Consulta 1: Precio promedio por tipo de propiedad y país
+        print_time("Consulta 1: Precio promedio por tipo de propiedad y país (property_type, address.country)")
         spark.sql("""
             SELECT 
                 property_type,
@@ -129,9 +129,7 @@ def calcular_precio_promedio_por_tipo_y_pais():
 
 # --- Ejecutar consulta principal ---
 if __name__ == "__main__":
-    print_time("INICIANDO CONSULTA: Precio promedio por tipo de propiedad y país")
     calcular_precio_promedio_por_tipo_y_pais()
-    print_time("CONSULTA COMPLETADA")
     
     # Detener Spark
     print_time("Deteniendo Spark...")

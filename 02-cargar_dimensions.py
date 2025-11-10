@@ -3,7 +3,7 @@ from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 from bson import json_util
 
-with open("config.json") as f:
+with open("config/config.json") as f:
     config = json.load(f)
 
 user = config["student_cnx"]["grp_user"]

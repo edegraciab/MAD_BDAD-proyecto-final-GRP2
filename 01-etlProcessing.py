@@ -6,11 +6,11 @@ from bson import json_util
 
 # --- Conexión a MongoDB ---
 # Leemos credenciales desde config.json (buena práctica de seguridad)
-with open("config.json") as f:
+with open("config/config.json") as f:
     config = json.load(f)
 
-user = config["mongo_user"]
-password = config["mongo_pass"]
+user = config["etl_source_cnx"]["mongo_user"]
+password = config["etl_source_cnx"]["mongo_pass"]
 
 # URL de conexión al clúster de MongoDB Atlas
 url = f"mongodb+srv://{user}:{password}@educationalcluster.7xf5hht.mongodb.net/?retryWrites=true&w=majority&appName=EducationalCluster"
@@ -103,14 +103,14 @@ for doc in docs:
 # --- LOAD ---
 # Guardamos CSV con atributos escalares
 df = pd.DataFrame(csv_rows)
-df.to_csv("listings.csv", index=False)
+df.to_csv("data/listings.csv", index=False)
 
 # Guardamos JSON con dimensiones usando siempre dumps de json_util
 # ¡Cargarlo a su cluster!
-with open("listings_dimensions.json", "w", encoding="utf-8") as f:
+with open("data/listings_dimensions.json", "w", encoding="utf-8") as f:
     f.write(json_util.dumps(dimension_docs, indent=2, ensure_ascii=False))
 
 # Guardamos JSON con hechos usando siempre dumps de json_util
 # Este se cargará desde mi clúster
-with open("listings_facts.json", "w", encoding="utf-8") as f:
+with open("data/listings_facts.json", "w", encoding="utf-8") as f:
     f.write(json_util.dumps(fact_docs, indent=2, ensure_ascii=False))

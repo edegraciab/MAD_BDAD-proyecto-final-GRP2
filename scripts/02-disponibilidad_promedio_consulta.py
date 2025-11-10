@@ -27,7 +27,6 @@ spark = (
 )
 
 spark.sparkContext.setLogLevel("ERROR")
-print_time("Spark inicializado")
 
 # --- Configuración simplificada (solo archivos locales) ---
 print_time("Usando solo archivos locales - no se requiere MongoDB")
@@ -39,13 +38,11 @@ def cargar_datos_necesarios():
     
     # 1. Leer JSON facts (contiene availability.availability_365)
     print_time("Leyendo JSON facts para availability_365...")
-    df_facts = spark.read.option("multiline", "true").json("listings_facts.json")
-    print_time("Facts JSON cargado")
+    df_facts = spark.read.option("multiline", "true").json("data/listings_facts.json")
     
     # 2. Leer JSON dimensions LOCAL (contiene address.market)
     print_time("Leyendo JSON dimensions LOCAL para market...")
-    df_dimensions_raw = spark.read.option("multiline", "true").json("listings_dimensions.json")
-    print_time("Dimensions JSON local cargado")
+    df_dimensions_raw = spark.read.option("multiline", "true").json("data/listings_dimensions.json")
     
     # Seleccionar solo los campos necesarios: _id y address.market
     print_time("Extrayendo solo _id y address.market...")
@@ -54,7 +51,7 @@ def cargar_datos_necesarios():
     # Renombrar la columna para simplicidad
     df_dimensions = df_dimensions.withColumnRenamed("address.market", "market")
     
-    print_time("Verificando estructura de dimensions...")
+    '''print_time("Verificando estructura de dimensions...")
     df_dimensions.printSchema()
     df_dimensions.show(5, truncate=False)
     print_time(f"DataFrame dimensions procesado: {df_dimensions.count()} registros")
@@ -63,7 +60,7 @@ def cargar_datos_necesarios():
     print_time("Verificando estructura de facts (availability)...")
     df_facts.select("_id", "availability").printSchema()
     df_facts.select("_id", "availability").show(5, truncate=False)
-    print_time(f"DataFrame facts procesado: {df_facts.count()} registros")
+    print_time(f"DataFrame facts procesado: {df_facts.count()} registros")'''
     
     return df_facts, df_dimensions
 
@@ -87,12 +84,13 @@ def calcular_disponibilidad_promedio_por_ciudad():
     )
     print_time(f"Registros después de JOIN: {joined_final.count()}")
     
-    # Verificar estructura de availability
+    '''# Verificar estructura de availability
     print_time("Verificando estructura del campo availability...")
     joined_final.select("availability").printSchema()
-    joined_final.select("_id", "market", "availability").show(5, truncate=False)
-    
+    joined_final.select("_id", "market", "availability").show(5, truncate=False)'''
+
     # Registrar vista temporal
+    joined_final.select("_id", "market", "availability")
     joined_final.createOrReplaceTempView("datos_disponibilidad")
     
     # Intentar diferentes consultas según la estructura de availability
@@ -100,14 +98,14 @@ def calcular_disponibilidad_promedio_por_ciudad():
     
     try:        
         # Consulta 2: Intentar con availability.availability_365
-        print_time("Consulta 2: Con availability.availability_365...")
+        print_time("Consulta 2: Disponibilidad anual promedio por ciudad (market, availability_365)")
         spark.sql("""
             SELECT 
-                market as ciudad,
-                COUNT(*) as total_alojamientos,
-                ROUND(AVG(availability.availability_365), 2) as disponibilidad_promedio
-                --,MIN(availability.availability_365) as min_disponibilidad
-                --,MAX(availability.availability_365) as max_disponibilidad
+                 market as ciudad
+                ,COUNT(*) as total_alojamientos
+                ,ROUND(AVG(availability.availability_365), 2) as disponibilidad_promedio
+                ,MIN(availability.availability_365) as min_disponibilidad
+                ,MAX(availability.availability_365) as max_disponibilidad
             FROM datos_disponibilidad 
             WHERE market IS NOT NULL 
             AND market != ''
@@ -128,7 +126,7 @@ def explorar_estructura_availability():
     print_time("=== EXPLORANDO ESTRUCTURA DE AVAILABILITY ===")
     
     # Cargar solo facts para explorar
-    df_facts = spark.read.option("multiline", "true").json("listings_facts.json")
+    df_facts = spark.read.option("multiline", "true").json("data/listings_facts.json")
     
     print_time("Esquema completo de facts...")
     df_facts.printSchema()
@@ -143,15 +141,12 @@ def explorar_estructura_availability():
 
 # --- Ejecutar consulta principal ---
 if __name__ == "__main__":
-    print_time("INICIANDO CONSULTA: Disponibilidad anual promedio por ciudad")
-    
-    # Primero explorar la estructura
-    explorar_estructura_availability()
+
+    # Primero explorar la estructura (opcional)
+    #explorar_estructura_availability()
     
     # Luego ejecutar la consulta principal
     calcular_disponibilidad_promedio_por_ciudad()
-    
-    print_time("CONSULTA COMPLETADA")
     
     # Detener Spark
     print_time("Deteniendo Spark...")
